@@ -13,6 +13,7 @@ const app = express();
 
 const mongoUrl = MONGODB_URI;
 mongoose
+  // @ts-ignore
   .connect(mongoUrl)
   .then(() => {
     info('Connected to MongoDB!');
