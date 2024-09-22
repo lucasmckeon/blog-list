@@ -1,4 +1,5 @@
 import express from 'express';
+import 'express-async-errors';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { MONGODB_URI } from './utils/config.js';
@@ -12,8 +13,8 @@ import { error, info } from './utils/logger.js';
 const app = express();
 
 const mongoUrl = MONGODB_URI;
+if (mongoUrl === undefined) throw new Error('Mongo URL undefined');
 mongoose
-  // @ts-ignore
   .connect(mongoUrl)
   .then(() => {
     info('Connected to MongoDB!');
