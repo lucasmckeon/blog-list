@@ -21,6 +21,14 @@ const errorHandler = (err, request, response, next) => {
       error:
         'Blog post unable to be saved because blogs creator cannot be found',
     });
+  } else if (err.name === 'InvalidUsername') {
+    return response.status(401).json({
+      error: 'Username is not valid',
+    });
+  } else if (err.name === 'PasswordValidationFailed') {
+    return response.status(401).json({
+      error: 'Password is incorrect',
+    });
   } else if (err.name === 'ValidationError') {
     return response.status(422).send({ error: err.message });
   } else if (
