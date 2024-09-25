@@ -51,7 +51,7 @@ test.only('username and password provided and at least 3 characters', async () =
   await api.post('/api/users').send(invalidUser3).expect(422);
   const result = await api.post('/api/users').send(invalidUser4).expect(422);
   assert(
-    result.body.errorMessage ===
+    result.body.error ===
       'Username and password must provided and be at least 3 characters long'
   );
 

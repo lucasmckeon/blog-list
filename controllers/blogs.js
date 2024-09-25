@@ -1,18 +1,27 @@
 import express from 'express';
 import { Blog } from '../models/blog.js';
+import { User } from '../models/user.js';
 const blogsRouter = express.Router();
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({});
+  const blogs = await Blog.find({}).populate('user', 'username name');
   response.json(blogs);
 });
 
 blogsRouter.post('/', async (request, response) => {
   if (!request.body.title || !request.body.url) response.sendStatus(400);
   if (!request.body.likes) request.body.likes = 0;
-  const blog = new Blog(request.body);
-  const result = await blog.save();
-  response.status(201).json(result);
+  const user = await User.findOne({});
+  if (user === null) {
+    const error = new Error();
+    error.name = 'UserNotFoundDuringSaveBlog';
+    throw error;
+  }
+  const blog = new Blog({ ...request.body, user: user.id });
+  const savedBlog = await blog.save();
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
+  response.status(201).json(savedBlog);
 });
 
 blogsRouter.delete('/:id', async (request, response) => {

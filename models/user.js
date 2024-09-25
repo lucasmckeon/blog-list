@@ -1,13 +1,19 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  name: String,
+  blogs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog',
+    },
+  ],
   username: {
     type: String,
     required: true,
     unique: true,
     minLength: 3,
   },
+  name: String,
   passwordHash: { type: String, required: true },
 });
 
