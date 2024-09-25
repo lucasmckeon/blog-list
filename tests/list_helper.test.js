@@ -38,18 +38,77 @@ describe('when blog posts retrieved', () => {
   });
 });
 
-test.only('POST request creates a new blog post', async () => {
-  const title = 'Test Title';
-  const newBlog = { title, author: 'Test Author', url: 'Test URL', likes: 12 };
-  const blog = await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/);
-  const blogs = await getBlogsInDB();
-  assert(blogs.length === getInitialAmountOfBlogs() + 1);
-  const titles = blogs.map((b) => b.title);
-  assert(titles.includes(title));
+describe('when HTTP POST requests to /api/blogs', () => {
+  test('Creates a new blog post', async () => {
+    const title = 'Test Title';
+    const newBlog = {
+      title,
+      author: 'Test Author',
+      url: 'Test URL',
+      likes: 12,
+    };
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+    const blogs = await getBlogsInDB();
+    assert(blogs.length === getInitialAmountOfBlogs() + 1);
+    const titles = blogs.map((blog) => blog.title);
+    assert(titles.includes(title));
+  });
+  test('Default likes property to 0 if likes property missing', async () => {
+    const title = 'Test Title';
+    const newBlog = {
+      title,
+      author: 'Test Author',
+      url: 'Test URL',
+    };
+    const blog = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+    const blogs = await getBlogsInDB();
+    const newBlogFromDB = blogs.find((blog) => blog.title === title);
+    assert(newBlogFromDB?.likes == 0);
+  });
+  test.only('Respond with 400 Bad Request if title or url properties missing', async () => {
+    const newBlog = {
+      author: 'Test Author',
+    };
+    await api.post('/api/blogs').send(newBlog).expect(400);
+  });
+});
+
+test('Delete a single blog post', async () => {
+  const blogsAtStart = await getBlogsInDB();
+  const blogToDelete = blogsAtStart[0];
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+  const blogsAtEnd = await getBlogsInDB();
+
+  const titles = blogsAtEnd.map((r) => r.title);
+  assert(!titles.includes(blogToDelete.title));
+
+  assert.strictEqual(blogsAtEnd.length, getInitialAmountOfBlogs() - 1);
+});
+
+test.only('Update blog post', async () => {
+  const blogsAtStart = await getBlogsInDB();
+  const blogToUpdate = blogsAtStart[0];
+  const oldTitle = blogToUpdate.title;
+  const updatedTitle = 'Updated Title';
+  const updatedBlog = { ...blogToUpdate, title: updatedTitle };
+  await api.put(`/api/blogs/${blogToUpdate.id}`).send(updatedBlog).expect(200);
+
+  const blogsAtEnd = await getBlogsInDB();
+
+  const titles = blogsAtEnd.map((r) => r.title);
+  assert(!titles.includes(oldTitle));
+  assert(titles.includes(updatedTitle));
+  assert.strictEqual(blogsAtEnd.length, getInitialAmountOfBlogs());
 });
 
 describe('like utility methods', () => {
