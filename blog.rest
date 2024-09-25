@@ -10,3 +10,13 @@ content-type:application/json
 
 ###
 GET http://localhost:3001/api/blogs
+
+###
+POST http://localhost:3001/api/users 
+content-type:application/json
+
+{
+  "username":"Test",
+  "name":"Test",
+  "password":"Test"
+}

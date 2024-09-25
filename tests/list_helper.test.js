@@ -73,11 +73,11 @@ describe('when HTTP POST requests to /api/blogs', () => {
     const newBlogFromDB = blogs.find((blog) => blog.title === title);
     assert(newBlogFromDB?.likes == 0);
   });
-  test.only('Respond with 400 Bad Request if title or url properties missing', async () => {
+  test('Respond with 400 Bad Request if title or url properties missing', async () => {
     const newBlog = {
       author: 'Test Author',
     };
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api.post('/api/blogs').send(newBlog).expect(422);
   });
 });
 
@@ -95,7 +95,7 @@ test('Delete a single blog post', async () => {
   assert.strictEqual(blogsAtEnd.length, getInitialAmountOfBlogs() - 1);
 });
 
-test.only('Update blog post', async () => {
+test('Update blog post', async () => {
   const blogsAtStart = await getBlogsInDB();
   const blogToUpdate = blogsAtStart[0];
   const oldTitle = blogToUpdate.title;
