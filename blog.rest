@@ -29,3 +29,15 @@ content-type:application/json
   "username":"Test",
   "password":"Test"
 }
+
+###
+POST http://localhost:3001/api/blogs
+content-type:application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3QiLCJpZCI6IjY2ZjM5OTAxMjA3MDlmMWE0ZWU5NWNiYSIsImlhdCI6MTcyNzMwNDE1MSwiZXhwIjoxNzI3MzA3NzUxfQ.a6ln2OvhrJXhdP4ukDV8--N0IaiqwTshdlAd3vRVnz8
+
+{
+  "title": "Testss",
+  "author": "Testss",
+  "url": "Testss",
+  "likes": 24
+}

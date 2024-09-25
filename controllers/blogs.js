@@ -1,6 +1,11 @@
 import express from 'express';
 import { Blog } from '../models/blog.js';
 import { User } from '../models/user.js';
+import jwt from 'jsonwebtoken';
+import {
+  getNoTokenProvidedError,
+  getTokenInvalidError,
+} from '../utils/errors.js';
 const blogsRouter = express.Router();
 
 blogsRouter.get('/', async (request, response) => {
@@ -8,15 +13,31 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs);
 });
 
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
+
 blogsRouter.post('/', async (request, response) => {
-  if (!request.body.title || !request.body.url) response.sendStatus(400);
   if (!request.body.likes) request.body.likes = 0;
-  const user = await User.findOne({});
+  const token = getTokenFrom(request);
+  if (!token) {
+    throw getNoTokenProvidedError();
+  }
+  const userFromToken = jwt.verify(token, process.env.SECRET);
+  if (!userFromToken.id) {
+    throw getTokenInvalidError();
+  }
+  const user = await User.findById(userFromToken.id);
   if (user === null) {
     const error = new Error();
     error.name = 'UserNotFoundDuringSaveBlog';
     throw error;
   }
+
   const blog = new Blog({ ...request.body, user: user.id });
   const savedBlog = await blog.save();
   user.blogs = user.blogs.concat(savedBlog._id);

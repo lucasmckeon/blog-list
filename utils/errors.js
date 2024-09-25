@@ -1,13 +1,28 @@
 const getInvalidUsernameError = () => {
-  const error = new Error();
-  error.name = 'InvalidUsername';
-  return error;
+  return createErrorWithName('InvalidUsername');
 };
 
 const getIncorrectPasswordError = () => {
-  const error = new Error();
-  error.name = 'PasswordValidationFailed';
-  return error;
+  return createErrorWithName('PasswordValidationFailed');
 };
 
-export { getInvalidUsernameError, getIncorrectPasswordError };
+const getNoTokenProvidedError = () => {
+  return createErrorWithName('NoTokenProvided');
+};
+
+const getTokenInvalidError = () => {
+  return createErrorWithName('InvalidToken');
+};
+
+function createErrorWithName(name) {
+  const error = new Error();
+  error.name = name;
+  return error;
+}
+
+export {
+  getInvalidUsernameError,
+  getIncorrectPasswordError,
+  getTokenInvalidError,
+  getNoTokenProvidedError,
+};
