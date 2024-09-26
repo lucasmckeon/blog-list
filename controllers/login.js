@@ -2,10 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.js';
-import {
-  getInvalidUsernameError,
-  getIncorrectPasswordError,
-} from '../utils/errors.js';
+import { getIncorrectPasswordError, getUserNotFound } from '../utils/errors.js';
 const { sign } = jwt;
 const { compare } = bcrypt;
 const loginRouter = express.Router();
@@ -14,7 +11,7 @@ loginRouter.post('/', async (request, response) => {
   const { username, password } = request.body;
 
   const user = await User.findOne({ username });
-  if (!user) throw getInvalidUsernameError();
+  if (!user) throw getUserNotFound();
 
   const isPasswordCorrect = await compare(password, user.passwordHash);
   if (!isPasswordCorrect) throw getIncorrectPasswordError();

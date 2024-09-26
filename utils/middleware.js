@@ -1,4 +1,40 @@
+import { User } from '../models/user.js';
 import { info, error } from '../utils/logger.js';
+import jwt from 'jsonwebtoken';
+import {
+  getNoTokenProvidedError,
+  getTokenInvalidError,
+  getUserNotFound,
+} from './errors.js';
+
+const userExtractor = async (request, response, next) => {
+  const token = request.token;
+  if (!token) {
+    throw getNoTokenProvidedError();
+  }
+  const secret = process.env.SECRET;
+  if (!secret) throw new Error('process.env.SECRET is undefined');
+  const userFromToken = jwt.verify(token, secret);
+  // @ts-ignore
+  if (!userFromToken.id) {
+    throw getTokenInvalidError();
+  }
+  // @ts-ignore
+  const user = await User.findById(userFromToken.id);
+  if (user === null) {
+    throw getUserNotFound();
+  }
+  request.user = user;
+  next();
+};
+
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    request.token = authorization.replace('Bearer ', '');
+  }
+  next();
+};
 
 const requestLogger = (request, response, next) => {
   info('Method:', request.method);
@@ -21,11 +57,11 @@ const errorHandler = (err, request, response, next) => {
       error:
         'Blog post unable to be saved because blogs creator cannot be found',
     });
-  } else if (err.name === 'InvalidUsername') {
-    return response.status(401).json({
-      error: 'Username is not valid',
+  } else if (err.name === 'InvalidPassword') {
+    return response.status(422).json({
+      error: 'Password must be at least 3 characters long',
     });
-  } else if (err.name === 'PasswordValidationFailed') {
+  } else if (err.name === 'IncorrectPassword') {
     return response.status(401).json({
       error: 'Password is incorrect',
     });
@@ -46,13 +82,29 @@ const errorHandler = (err, request, response, next) => {
     return response
       .status(422)
       .json({ error: 'expected `username` to be unique' });
-  } else if (err.name === 'UsernamePasswordValidationError') {
-    return response.status(422).json({
-      error:
-        'Username and password must provided and be at least 3 characters long',
+  } else if (err.name === 'DeleteBlogFailed') {
+    return response.status(404).json({
+      error: 'Deletion of blog failed',
+    });
+  } else if (err.name === 'UserNotFound') {
+    return response.status(404).json({
+      error: 'User not found',
+    });
+  } else if (err.name === 'BlogNotFound') {
+    return response.status(404).json({
+      error: 'Blog not found',
     });
   }
-  next(err);
+
+  return response.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+  });
 };
 
-export { requestLogger, unknownEndpoint, errorHandler };
+export {
+  requestLogger,
+  unknownEndpoint,
+  errorHandler,
+  tokenExtractor,
+  userExtractor,
+};

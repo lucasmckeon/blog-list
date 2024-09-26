@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { User } from '../models/user.js';
+import { getInvalidPasswordError } from '../utils/errors.js';
 
 const usersRouter = express.Router();
 
@@ -10,11 +11,9 @@ usersRouter.get('/', async (request, response) => {
 });
 
 usersRouter.post('/', async (request, response) => {
-  const { username, password } = request.body;
-  if (!username || username.length < 3 || !password || password.length < 3) {
-    const error = new Error();
-    error.name = 'UsernamePasswordValidationError';
-    throw error;
+  const { password } = request.body;
+  if (!password || password.length < 3) {
+    throw getInvalidPasswordError();
   }
   const passwordHash = await bcrypt.hash(password, 10);
   const user = new User({

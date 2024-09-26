@@ -1,11 +1,11 @@
 import express from 'express';
 import { Blog } from '../models/blog.js';
-import { User } from '../models/user.js';
-import jwt from 'jsonwebtoken';
 import {
-  getNoTokenProvidedError,
+  getBlogNotFoundError,
+  getDeleteBlogFailedError,
   getTokenInvalidError,
 } from '../utils/errors.js';
+import { userExtractor } from '../utils/middleware.js';
 const blogsRouter = express.Router();
 
 blogsRouter.get('/', async (request, response) => {
@@ -13,31 +13,9 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs);
 });
 
-const getTokenFrom = (request) => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '');
-  }
-  return null;
-};
-
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', userExtractor, async (request, response) => {
   if (!request.body.likes) request.body.likes = 0;
-  const token = getTokenFrom(request);
-  if (!token) {
-    throw getNoTokenProvidedError();
-  }
-  const userFromToken = jwt.verify(token, process.env.SECRET);
-  if (!userFromToken.id) {
-    throw getTokenInvalidError();
-  }
-  const user = await User.findById(userFromToken.id);
-  if (user === null) {
-    const error = new Error();
-    error.name = 'UserNotFoundDuringSaveBlog';
-    throw error;
-  }
-
+  const user = request.user;
   const blog = new Blog({ ...request.body, user: user.id });
   const savedBlog = await blog.save();
   user.blogs = user.blogs.concat(savedBlog._id);
@@ -45,12 +23,28 @@ blogsRouter.post('/', async (request, response) => {
   response.status(201).json(savedBlog);
 });
 
-blogsRouter.delete('/:id', async (request, response) => {
-  const id = request.params.id;
-  const result = await Blog.findByIdAndDelete(id);
+blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+  const user = request.user;
+  const blogToDeleteId = request.params.id;
+  console.log('ID:', blogToDeleteId);
+  const blogToDelete = await Blog.findById(blogToDeleteId);
+  if (!blogToDelete) {
+    throw getBlogNotFoundError();
+  }
+  if (blogToDelete.user?.toString() !== user.id.toString()) {
+    throw getTokenInvalidError();
+  }
+  const deletedDoc = await Blog.findByIdAndDelete(blogToDeleteId);
+  if (!deletedDoc) {
+    throw getDeleteBlogFailedError();
+  }
+  user.blogs = user.blogs.filter(
+    (bId) => bId.toString() !== deletedDoc._id.toString()
+  );
+  await user.save();
   response.sendStatus(204);
 });
-
+//TODO update to user authorization
 blogsRouter.put('/:id', async (request, response) => {
   const id = request.params.id;
   const body = request.body;

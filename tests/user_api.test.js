@@ -1,4 +1,4 @@
-import { test, describe, beforeEach, after } from 'node:test';
+import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import supertest from 'supertest';
 import { app } from '../app.js';
@@ -49,11 +49,7 @@ test.only('username and password provided and at least 3 characters', async () =
   await api.post('/api/users').send(invalidUser1).expect(422);
   await api.post('/api/users').send(invalidUser2).expect(422);
   await api.post('/api/users').send(invalidUser3).expect(422);
-  const result = await api.post('/api/users').send(invalidUser4).expect(422);
-  assert(
-    result.body.error ===
-      'Username and password must provided and be at least 3 characters long'
-  );
+  await api.post('/api/users').send(invalidUser4).expect(422);
 
   const validUser = {
     username: 'aaa',

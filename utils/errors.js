@@ -1,9 +1,9 @@
-const getInvalidUsernameError = () => {
-  return createErrorWithName('InvalidUsername');
+const getInvalidPasswordError = () => {
+  return createErrorWithName('InvalidPassword');
 };
 
 const getIncorrectPasswordError = () => {
-  return createErrorWithName('PasswordValidationFailed');
+  return createErrorWithName('IncorrectPassword');
 };
 
 const getNoTokenProvidedError = () => {
@@ -14,6 +14,18 @@ const getTokenInvalidError = () => {
   return createErrorWithName('InvalidToken');
 };
 
+const getDeleteBlogFailedError = () => {
+  return createErrorWithName('DeleteBlogFailed');
+};
+
+const getBlogNotFoundError = () => {
+  return createErrorWithName('BlogNotFound');
+};
+
+const getUserNotFound = () => {
+  return createErrorWithName('UserNotFound');
+};
+
 function createErrorWithName(name) {
   const error = new Error();
   error.name = name;
@@ -21,8 +33,11 @@ function createErrorWithName(name) {
 }
 
 export {
-  getInvalidUsernameError,
+  getInvalidPasswordError,
   getIncorrectPasswordError,
   getTokenInvalidError,
   getNoTokenProvidedError,
+  getDeleteBlogFailedError,
+  getUserNotFound,
+  getBlogNotFoundError,
 };

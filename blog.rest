@@ -33,7 +33,19 @@ content-type:application/json
 ###
 POST http://localhost:3001/api/blogs
 content-type:application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3QiLCJpZCI6IjY2ZjM5OTAxMjA3MDlmMWE0ZWU5NWNiYSIsImlhdCI6MTcyNzMwNDE1MSwiZXhwIjoxNzI3MzA3NzUxfQ.a6ln2OvhrJXhdP4ukDV8--N0IaiqwTshdlAd3vRVnz8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3QiLCJpZCI6IjY2ZjM5OTAxMjA3MDlmMWE0ZWU5NWNiYSIsImlhdCI6MTcyNzMxMzU2OSwiZXhwIjoxNzI3MzE3MTY5fQ.IvtRl0DXiN6QXiQuMXfmesskQ22ec_OqlI56c7XAd1o
+
+{
+  "title": "Testss",
+  "author": "Testss",
+  "url": "Testss",
+  "likes": 24
+}
+
+###
+DELETE  http://localhost:3001/api/blogs/66f4bf8c87116b3c7a34122d
+content-type:application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3QiLCJpZCI6IjY2ZjM5OTAxMjA3MDlmMWE0ZWU5NWNiYSIsImlhdCI6MTcyNzMxMzU2OSwiZXhwIjoxNzI3MzE3MTY5fQ.IvtRl0DXiN6QXiQuMXfmesskQ22ec_OqlI56c7XAd1o
 
 {
   "title": "Testss",
